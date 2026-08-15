@@ -2,10 +2,10 @@ import os
 import sys
 import time
 import datetime
-import fastapi
 
-main()
+
+def main():
+    print("Starting the application...")
 
 if __name__ == "__main__":
     main()
-    
