@@ -60,6 +60,10 @@ def generate_page_layout(title_text: str, content_html: str = "") -> str:
 
         <h1 class="text-3xl font-bold tracking-wide">{title_text}</h1>
 
+        <button type="button" onclick="location.href='/about'" class="absolute right-28 p-2 hover:bg-cyan-900 rounded-lg transition-colors cursor-pointer text-slate-400 hover:text-white">
+            <h2>About</h2>
+        </button>
+
         <button type="button" onclick="location.href='/settings'" class="absolute right-0 p-2 hover:bg-cyan-900 rounded-lg transition-colors cursor-pointer text-slate-400 hover:text-white">
             <img class="w-6 h-6 object-scale-down" src="/static/images/settings-svgrepo-com.svg" alt="Settings Configuration">
         </button>
@@ -138,14 +142,20 @@ def read_root():
 
 @app.get("/settings", response_class=HTMLResponse)
 def read_settings():
-    settings_content = """<div class="text-cyan-400">Settings panel configuration context.</div>"""
+    settings_content = (
+        """<div class="text-cyan-400">Settings panel configuration context.</div>"""
+    )
     return generate_page_layout(title_text="Settings", content_html=settings_content)
 
 
 @app.get("/statistics", response_class=HTMLResponse)
 def read_statistics():
-    statistics_content = """<div class="text-cyan-400">Statistics data dashboard logs.</div>"""
-    return generate_page_layout(title_text="Statistics", content_html=statistics_content)
+    statistics_content = (
+        """<div class="text-cyan-400">Statistics data dashboard logs.</div>"""
+    )
+    return generate_page_layout(
+        title_text="Statistics", content_html=statistics_content
+    )
 
 
 @app.get("/api/dashboard-table")
@@ -189,19 +199,64 @@ def get_dashboard_table(response: Response):
             </td>
         </tr>
         """
-        
+
     return HTMLResponse(content=rows_html)
+
 
 @app.get("/aircraft/{hex_code}", response_class=HTMLResponse)
 def read_aircraft_details(hex_code: str):
 
-    url = "http://192.168.1.103/tar1090/data/aircraft.json"
+    about_content = f"""
+    <div class="bg-slate-800/50 border border-cyan-800 rounded-xl p-8 max-w-2xl mx-auto shadow-lg">
+        <!-- 1. The script automatically populates and refreshes this container block -->
+        <div id="live-details">
+            <div class="text-center p-4 text-slate-400 animate-pulse">Loading live aircraft parameters...</div>
+        </div>
+        
+        <div class="mt-8 pt-4 border-t border-slate-700 text-right">
+            <a href="/" class="text-cyan-400 hover:text-cyan-300 font-semibold underline">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- 2. Pure native background script worker to fetch updates every 5000ms -->
+    <script>
+    async function refreshAircraftStats() {{
+        try {{
+            const res = await fetch('/api/aircraft/{hex_code}');
+            if (res.ok) {{
+                const freshHtml = await res.text();
+                const container = document.getElementById('live-details');
+                if (container) {{
+                    container.innerHTML = freshHtml;
+                }}
+            }}
+        }} catch (err) {{
+            console.error("Aircraft stats connection dropped:", err);
+        }}
+    }}
     
+    // Initial fetch to load instantly, then establish a 5-second interval timer loop
+    refreshAircraftStats();
+    setInterval(refreshAircraftStats, 5000);
+    </script>
+    """
+    return generate_page_layout(
+        title_text="Aircraft Details", content_html=about_content
+    )
+
+
+@app.get("/api/aircraft/{hex_code}", response_class=HTMLResponse)
+def get_aircraft_details_fragment(hex_code: str, response: Response):
+    # Enforce strict anti-caching headers so browser tracking values update correctly
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    url = "http://192.168.1.103/tar1090/data/aircraft.json"
     target_plane = None
     try:
-        response = requests.get(url, timeout=1)
-        aircraft_data = response.json()
-        
+        api_res = requests.get(url, timeout=1)
+        aircraft_data = api_res.json()
 
         for plane in aircraft_data.get("aircraft", []):
             if plane.get("hex") == hex_code:
@@ -210,44 +265,38 @@ def read_aircraft_details(hex_code: str):
     except Exception:
         pass
 
-
     if not target_plane:
-        about_content = f"""
-        <div class="text-center p-8 bg-slate-800/50 rounded-xl border border-slate-700">
-            <p class="text-xl text-slate-400">Aircraft with hex code <span class="text-white font-mono font-bold">{hex_code}</span> is no longer in tracking range.</p>
-            <a href="/" class="mt-4 inline-block text-cyan-400 hover:underline">Return to Dashboard</a>
+        return f"""
+        <div class="text-center p-4">
+            <p class="text-xl text-red-400 font-medium">Aircraft ({hex_code.upper()}) has flown out of range or landed.</p>
         </div>
         """
-        return generate_page_layout(title_text="Aircraft Not Found", content_html=about_content)
-
 
     flight = target_plane.get("flight", "Unknown").strip()
-    aircraft_type = target_plane.get("t", "Unknown Type")
+    aircraft_type = target_plane.get("desc", "Unknown Type")
     speed = target_plane.get("gs", "N/A")
     altitude = target_plane.get("alt_baro", "N/A")
     squawk = target_plane.get("squawk", "N/A")
     lat = target_plane.get("lat", "N/A")
     lon = target_plane.get("lon", "N/A")
+    dst = target_plane.get("r_dst", "N/A")
+    dir_h = target_plane.get("r_dir", "N/A")
 
-    about_content = f"""
-    <div class="bg-slate-800/50 border border-cyan-800 rounded-xl p-8 max-w-2xl mx-auto shadow-lg">
-        <h2 class="text-2xl font-bold border-b border-cyan-800 pb-4 mb-6 text-cyan-400">
-            Flight: {flight} ({hex_code.upper()})
-        </h2>
-        
-        <div class="grid grid-cols-2 gap-6 text-lg">
-            <div><span>Aircraft Type</span> <strong class="text-white">{aircraft_type}</strong></div>
-            <div><span>Squawk Code</span> <strong class="text-white">{squawk}</strong></div>
-            <div><span>Ground Speed</span> <strong class="text-white">{speed} kt</strong></div>
-            <div><span>Barometric Altitude</span> <strong class="text-white">{altitude} ft</strong></div>
-            <div><span>Latitude</span> <strong class="text-white">{lat}</strong></div>
-            <div><span>Longitude</span> <strong class="text-white">{lon}</strong></div>
-        </div>
-        
-        <div class="mt-8 pt-4 border-t border-slate-700 text-right">
-            <a href="/" class="text-cyan-400 hover:text-cyan-300 font-semibold underline">← Back to Dashboard</a>
-        </div>
-    </div>
+    clean_hex = hex_code.upper()
+
+    # Return only the inner content fragment text that the script drops inside 'live-details'
+    return f"""
+    <h2 class="text-2xl font-bold border-b border-cyan-800 pb-4 mb-6 text-cyan-400">
+        Flight: {flight} ({clean_hex})
+    </h2>
+    
+    <div class="grid grid-cols-2 gap-6 text-lg">
+        <div><span class="text-slate-400 text-sm block">Aircraft Type</span> <strong class="text-white">{aircraft_type}</strong></div>
+        <div><span class="text-slate-400 text-sm block">Squawk Code</span> <strong class="text-white">{squawk}</strong></div>
+        <div><span class="text-slate-400 text-sm block">Ground Speed</span> <strong class="text-white">{speed} kt</strong></div>
+        <div><span class="text-slate-400 text-sm block">Barometric Altitude</span> <strong class="text-white">{altitude} ft</strong></div>
+        <div><span class="text-slate-400 text-sm block">Latitude</span> <strong class="text-white">{lat}</strong></div>
+        <div><span class="text-slate-400 text-sm block">Longitude</span> <strong class="text-white">{lon}</strong></div>
+        <div><span class="text-slate-400 text-sm block">Distance</span> <strong class="text-white">{dst}Nm</strong></div>
+        <div><span class="text-slate-400 text-sm block">Bearing</span> <strong class="text-white">{dir_h}°</strong></div>
     """
-
-    return generate_page_layout(title_text=f"Details for {flight}", content_html=about_content)
