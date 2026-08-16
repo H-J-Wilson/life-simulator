@@ -8,6 +8,11 @@
       "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
+    --color-teal-600: oklch(60% 0.118 184.704);
+    --color-cyan-400: oklch(78.9% 0.154 211.53);
+    --color-cyan-800: oklch(45% 0.085 224.283);
+    --color-cyan-900: oklch(39.8% 0.07 227.392);
+    --color-cyan-950: oklch(30.2% 0.056 229.695);
     --color-indigo-300: oklch(78.5% 0.115 274.713);
     --color-indigo-400: oklch(67.3% 0.182 276.935);
     --color-indigo-500: oklch(58.5% 0.233 277.117);
@@ -207,14 +212,38 @@
   .left-14 {
     left: calc(var(--spacing) * 14);
   }
+  .container {
+    width: 100%;
+    @media (width >= 40rem) {
+      max-width: 40rem;
+    }
+    @media (width >= 48rem) {
+      max-width: 48rem;
+    }
+    @media (width >= 64rem) {
+      max-width: 64rem;
+    }
+    @media (width >= 80rem) {
+      max-width: 80rem;
+    }
+    @media (width >= 96rem) {
+      max-width: 96rem;
+    }
+  }
   .mx-auto {
     margin-inline: auto;
   }
   .mb-8 {
     margin-bottom: calc(var(--spacing) * 8);
   }
+  .block {
+    display: block;
+  }
   .flex {
     display: flex;
+  }
+  .table {
+    display: table;
   }
   .h-6 {
     height: calc(var(--spacing) * 6);
@@ -269,6 +298,15 @@
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 1px;
   }
+  .border-cyan-950 {
+    border-color: var(--color-cyan-950);
+  }
+  .border-cyan-950\/50 {
+    border-color: color-mix(in srgb, oklch(30.2% 0.056 229.695) 50%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-cyan-950) 50%, transparent);
+    }
+  }
   .border-slate-400 {
     border-color: var(--color-slate-400);
   }
@@ -277,6 +315,21 @@
   }
   .border-slate-700 {
     border-color: var(--color-slate-700);
+  }
+  .bg-cyan-800 {
+    background-color: var(--color-cyan-800);
+  }
+  .bg-cyan-900 {
+    background-color: var(--color-cyan-900);
+  }
+  .bg-cyan-900\/50 {
+    background-color: color-mix(in srgb, oklch(39.8% 0.07 227.392) 50%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-cyan-900) 50%, transparent);
+    }
+  }
+  .bg-cyan-950 {
+    background-color: var(--color-cyan-950);
   }
   .bg-slate-300 {
     background-color: var(--color-slate-300);
@@ -296,6 +349,9 @@
   .bg-slate-900 {
     background-color: var(--color-slate-900);
   }
+  .bg-teal-600 {
+    background-color: var(--color-teal-600);
+  }
   .object-scale-down {
     object-fit: scale-down;
   }
@@ -307,6 +363,9 @@
   }
   .p-8 {
     padding: calc(var(--spacing) * 8);
+  }
+  .text-center {
+    text-align: center;
   }
   .text-left {
     text-align: left;
@@ -329,6 +388,9 @@
   .tracking-wide {
     --tw-tracking: var(--tracking-wide);
     letter-spacing: var(--tracking-wide);
+  }
+  .text-cyan-400 {
+    color: var(--color-cyan-400);
   }
   .text-gray-300 {
     color: var(--color-gray-300);
@@ -361,6 +423,28 @@
     transition-duration: var(--tw-duration, var(--default-transition-duration));
   }
   @media (hover: hover) {
+    .hover\:bg-cyan-900:hover {
+      background-color: var(--color-cyan-900);
+    }
+    .hover\:bg-cyan-900\/50:hover {
+      background-color: color-mix(in srgb, oklch(39.8% 0.07 227.392) 50%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-cyan-900\/50:hover {
+        background-color: color-mix(in oklab, var(--color-cyan-900) 50%, transparent);
+      }
+    }
+    .hover\:bg-cyan-950:hover {
+      background-color: var(--color-cyan-950);
+    }
+    .hover\:bg-cyan-950\/50:hover {
+      background-color: color-mix(in srgb, oklch(30.2% 0.056 229.695) 50%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-cyan-950\/50:hover {
+        background-color: color-mix(in oklab, var(--color-cyan-950) 50%, transparent);
+      }
+    }
     .hover\:bg-slate-300:hover {
       background-color: var(--color-slate-300);
     }
@@ -373,6 +457,14 @@
     @supports (color: color-mix(in lab, red, red)) {
       .hover\:bg-slate-700\/30:hover {
         background-color: color-mix(in oklab, var(--color-slate-700) 30%, transparent);
+      }
+    }
+    .hover\:bg-slate-700\/50:hover {
+      background-color: color-mix(in srgb, oklch(37.2% 0.044 257.287) 50%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-slate-700\/50:hover {
+        background-color: color-mix(in oklab, var(--color-slate-700) 50%, transparent);
       }
     }
     .hover\:bg-slate-800:hover {
