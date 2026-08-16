@@ -22,3 +22,7 @@ th {
 tbody {
   @apply p-4 text-left font-semibold p-4 font-medium text-white;
 }
+
+span {
+  @apply text-gray-400 block text-sm;
+}

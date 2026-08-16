@@ -1,3 +1,4 @@
+import html
 import os
 import sys
 import time
@@ -190,3 +191,63 @@ def get_dashboard_table(response: Response):
         """
         
     return HTMLResponse(content=rows_html)
+
+@app.get("/aircraft/{hex_code}", response_class=HTMLResponse)
+def read_aircraft_details(hex_code: str):
+
+    url = "http://192.168.1.103/tar1090/data/aircraft.json"
+    
+    target_plane = None
+    try:
+        response = requests.get(url, timeout=1)
+        aircraft_data = response.json()
+        
+
+        for plane in aircraft_data.get("aircraft", []):
+            if plane.get("hex") == hex_code:
+                target_plane = plane
+                break
+    except Exception:
+        pass
+
+
+    if not target_plane:
+        about_content = f"""
+        <div class="text-center p-8 bg-slate-800/50 rounded-xl border border-slate-700">
+            <p class="text-xl text-slate-400">Aircraft with hex code <span class="text-white font-mono font-bold">{hex_code}</span> is no longer in tracking range.</p>
+            <a href="/" class="mt-4 inline-block text-cyan-400 hover:underline">Return to Dashboard</a>
+        </div>
+        """
+        return generate_page_layout(title_text="Aircraft Not Found", content_html=about_content)
+
+
+    flight = target_plane.get("flight", "Unknown").strip()
+    aircraft_type = target_plane.get("t", "Unknown Type")
+    speed = target_plane.get("gs", "N/A")
+    altitude = target_plane.get("alt_baro", "N/A")
+    squawk = target_plane.get("squawk", "N/A")
+    lat = target_plane.get("lat", "N/A")
+    lon = target_plane.get("lon", "N/A")
+
+    about_content = f"""
+    <div class="bg-slate-800/50 border border-cyan-800 rounded-xl p-8 max-w-2xl mx-auto shadow-lg">
+        <h2 class="text-2xl font-bold border-b border-cyan-800 pb-4 mb-6 text-cyan-400">
+            Flight: {flight} ({hex_code.upper()})
+        </h2>
+        
+        <div class="grid grid-cols-2 gap-6 text-lg">
+            <div><span>Aircraft Type</span> <strong class="text-white">{aircraft_type}</strong></div>
+            <div><span>Squawk Code</span> <strong class="text-white">{squawk}</strong></div>
+            <div><span>Ground Speed</span> <strong class="text-white">{speed} kt</strong></div>
+            <div><span>Barometric Altitude</span> <strong class="text-white">{altitude} ft</strong></div>
+            <div><span>Latitude</span> <strong class="text-white">{lat}</strong></div>
+            <div><span>Longitude</span> <strong class="text-white">{lon}</strong></div>
+        </div>
+        
+        <div class="mt-8 pt-4 border-t border-slate-700 text-right">
+            <a href="/" class="text-cyan-400 hover:text-cyan-300 font-semibold underline">← Back to Dashboard</a>
+        </div>
+    </div>
+    """
+
+    return generate_page_layout(title_text=f"Details for {flight}", content_html=about_content)

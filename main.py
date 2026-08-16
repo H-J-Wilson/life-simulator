@@ -6,14 +6,15 @@ import sys
 import time
 from datetime import datetime
 import csv
-from dashboard import python_dashboard
 import uvicorn
+from dashboard import python_dashboard
 
 
 def main():
-    uvicorn.run("webpage:app", host="127.0.0.1", port=8000)
-    
 
+    uvicorn.run("webpage:app", host="0.0.0.0", port=8000)
+
+    
 
 if __name__ == "__main__":
     main()
