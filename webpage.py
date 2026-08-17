@@ -13,10 +13,11 @@ from fastapi import Response
 app = fastapi.FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+URL = "http://192.168.1.103/tar1090/data/aircraft.json"
 
 
 def generate_page_layout(title_text: str, content_html: str = "") -> str:
-    """Generates a consistent layout wrapper with navigation buttons and content."""
+    """Generates a consistent layout wrapper with navigation buttons, content, and footer."""
     timestamp = int(time.time())
     return f"""<html lang="en">
 <head>
@@ -25,7 +26,7 @@ def generate_page_layout(title_text: str, content_html: str = "") -> str:
     <title>{title_text} - Flight Tracker</title>
     <link href="/static/output.css?v={timestamp}" rel="stylesheet">
     
-    <!-- Using a robust native JavaScript reloader function to bypass firewalls -->
+
     <script>
     async function refreshFlightTable() {{
         try {{
@@ -46,37 +47,92 @@ def generate_page_layout(title_text: str, content_html: str = "") -> str:
     setInterval(refreshFlightTable, 5000);
     </script>
 </head>
-<body class="p-8 font-sans bg-cyan-950 text-white">
+<body>
     
-    <!-- Top Navigation Bar Container -->
-    <div class="relative flex items-center justify-center min-h-[64px] mb-8">
-        <button type="button" onclick="location.href='/'" class="absolute left-0 p-2 hover:bg-cyan-900 rounded-lg transition-colors cursor-pointer text-slate-400 hover:text-white">
-            <img class="w-8 h-8 object-scale-down" src="/static/images/airplane-svgrepo-com.svg" alt="Home Dashboard">
-        </button>
+    <div class="p-8 font-sans bg-cyan-950 text-white min-h-screen flex flex-col justify-between">
 
-        <button type="button" onclick="location.href='/statistics'" class="absolute left-14 p-2 hover:bg-cyan-900 rounded-lg transition-colors cursor-pointer text-slate-400 hover:text-white">
-             <img class="w-8 h-8 object-scale-down" src="/static/images/statistics-svgrepo-com.svg" alt="Statistics View">
-        </button>
+        <div class="relative flex items-center justify-center min-h-[64px] mb-8">
+            <button type="button" onclick="location.href='/'" class="absolute left-0 p-2 hover:bg-cyan-900 rounded-lg transition-colors cursor-pointer text-slate-400 hover:text-white">
+                <img class="w-8 h-8 object-scale-down" src="/static/images/airplane-svgrepo-com.svg" alt="Home Dashboard">
+            </button>
 
-        <h1 class="text-3xl font-bold tracking-wide">{title_text}</h1>
+            <button type="button" onclick="location.href='/statistics'" class="absolute left-14 p-2 hover:bg-cyan-900 rounded-lg transition-colors cursor-pointer text-slate-400 hover:text-white">
+                 <img class="w-8 h-8 object-scale-down" src="/static/images/statistics-svgrepo-com.svg" alt="Statistics View">
+            </button>
 
-        <button type="button" onclick="location.href='/about'" class="absolute right-28 p-2 hover:bg-cyan-900 rounded-lg transition-colors cursor-pointer text-slate-400 hover:text-white">
-            <h2>About</h2>
-        </button>
+            <h1 class="text-3xl font-bold tracking-wide">{title_text}</h1>
 
-        <button type="button" onclick="location.href='/settings'" class="absolute right-0 p-2 hover:bg-cyan-900 rounded-lg transition-colors cursor-pointer text-slate-400 hover:text-white">
-            <img class="w-6 h-6 object-scale-down" src="/static/images/settings-svgrepo-com.svg" alt="Settings Configuration">
-        </button>
+            <button type="button" onclick="location.href='/about'" class="absolute right-28 p-2 hover:bg-cyan-900 rounded-lg transition-colors cursor-pointer text-slate-400 hover:text-white">
+                <h2 class="text-lg font-semibold">About</h2>
+            </button>
+
+            <button type="button" onclick="location.href='/settings'" class="absolute right-0 p-2 hover:bg-cyan-900 rounded-lg transition-colors cursor-pointer text-slate-400 hover:text-white">
+                <img class="w-6 h-6 object-scale-down" src="/static/images/settings-svgrepo-com.svg" alt="Settings Configuration">
+            </button>
+        </div>
+
+        
+        <main class="max-w-7xl mx-auto w-full">
+            {content_html}
+        </main>
     </div>
 
-    <!-- Main Body Content Grid Wrapper -->
-    <main class="max-w-7xl mx-auto">
-        {content_html}
-    </main>
+    
+    <footer>
+        <div class="p-8 font-sans bg-teal-950 text-left flex flex-row">
+            <div class="flex-col">
+                <div>
+                    <button type="button" onclick="location.href='https://github.com/H-J-Wilson/planes'" class="text-cyan-400 hover:text-cyan-300 font-medium underline cursor-pointer transition-colors">
+                        GitHub Repository
+                    </button>
+
+                </div>
+                <div>
+                    <button type="button" onclick="location.href='https://github.com/wiedehopf/tar1090'" class="text-cyan-400 hover:text-cyan-300 font-medium underline cursor-pointer transition-colors" target="_blank">
+                        tar1090 Project
+                    </button>
+                </div>
+                <div>
+                    <br>
+                </div>
+                <div>
+                    <span class="text-slate-400 text-sm block">© 2026 Harry J. Wilson</span>
+                </div>
+                <div class="flex-row">
+                    <div>
+                        <span class="text-slate-400 text-sm block">Last Updated: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 text-sm block">Version: v0.0.2 16.08.2026</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-col">
+                <div class="inline-flex items-center gap-2 text-sm">
+    
+                    <button type="button" onclick="location.href='/contact'" class="text-cyan-400 hover:text-cyan-300 font-medium underline cursor-pointer transition-colors">
+                        Contact Me:
+                    </button>
+    
+    
+                    <span class="text-slate-400">harry1318945@gmail.com</span>
+                </div>
+                <div>
+                    <button type="button" onclick="location.href='{{ URL }}'" class="text-cyan-400 hover:text-cyan-300 font-medium underline cursor-pointer transition-colors">
+                        Live data
+                    </button>
+
+                </div>
+            </div>
+
+            <button type="button" onclick="location.href='/'" class="absolute right-0 p-2 hover:bg-cyan-900 rounded-lg transition-colors cursor-pointer text-slate-400 hover:text-white">
+                <img class="w-8 h-8 object-scale-down" src="/static/images/airplane-svgrepo-com.svg" alt="Home Dashboard">
+            </button>
+        </div>
+    </footer>
 
 </body>
 </html>"""
-
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
@@ -117,6 +173,7 @@ def read_root():
 
     # Added the id="flight-rows" marker so our script knows where to insert the table items
     table_content = f"""
+    <h2>Number of Aircraft: {len(aircraft_data['aircraft'])}</h2>
     <div class="overflow-x-auto rounded-xl border border-cyan-950 bg-cyan-900/50 shadow-md">
         <table class="w-full text-left border-collapse">
             <thead class="bg-cyan-950 text-gray-300">
@@ -208,7 +265,7 @@ def read_aircraft_details(hex_code: str):
 
     about_content = f"""
     <div class="bg-slate-800/50 border border-cyan-800 rounded-xl p-8 max-w-2xl mx-auto shadow-lg">
-        <!-- 1. The script automatically populates and refreshes this container block -->
+
         <div id="live-details">
             <div class="text-center p-4 text-slate-400 animate-pulse">Loading live aircraft parameters...</div>
         </div>
@@ -218,7 +275,7 @@ def read_aircraft_details(hex_code: str):
         </div>
     </div>
 
-    <!-- 2. Pure native background script worker to fetch updates every 5000ms -->
+
     <script>
     async function refreshAircraftStats() {{
         try {{
@@ -300,3 +357,18 @@ def get_aircraft_details_fragment(hex_code: str, response: Response):
         <div><span class="text-slate-400 text-sm block">Distance</span> <strong class="text-white">{dst}Nm</strong></div>
         <div><span class="text-slate-400 text-sm block">Bearing</span> <strong class="text-white">{dir_h}°</strong></div>
     """
+
+
+@app.get("/about", response_class=HTMLResponse)
+def read_about():
+    about_content = f"""
+    
+    """
+    return generate_page_layout(title_text="About", content_html=about_content)
+
+@app.get("/contact", response_class=HTMLResponse)
+def read_contact():
+    contact_content = f"""
+    
+    """
+    return generate_page_layout(title_text="Contact", content_html=contact_content)

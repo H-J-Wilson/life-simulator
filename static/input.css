@@ -19,8 +19,8 @@ th {
   @apply p-4 text-left font-semibold;
 }
 
-tbody {
-  @apply p-4 text-left font-semibold p-4 font-medium text-white;
+td {
+  @apply p-4 text-left font-semibold p-4 font-medium text-white whitespace-nowrap;
 }
 
 span {
