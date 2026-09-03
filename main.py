@@ -58,57 +58,52 @@ def main():
     print("Content of world:", world)
 
     while running:
-        screen.fill(color_bg)  # fill the screen with background color
+        screen.fill(color_bg)  # Fill the screen with background color
 
-        for event in pygame.event.get():  # iterate through events
-            if event.type == pygame.QUIT:  # check if the event is a quit event
-                running = False  # set running to False to exit the game loop
-
+        # 1. EVENT INTERFACES (Cleaned up: No entity updates here)
+        for event in pygame.event.get():  
+            if event.type == pygame.QUIT:  
+                running = False  
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:  # Press ESC to exit safely
+                if event.key == pygame.K_ESCAPE:  
                     running = False
 
-        pooh_list = world.get("pooh", []) 
-        for pooh in pooh_list:
-            moves = pooh.update()  # Update Pooh's state
-            pooh.move(
-            moves[0], moves[1]
-            )  # Move Pooh based on his speed and direction  
+        # 2. GAME STATE MODIFICATIONS (Un-indented so it runs autonomously!)
+        for pooh in world["pooh"]:
+            moves = pooh.update()  
+            pooh.move(moves[0], moves[1])  
+
+        # 3. RENDER ALL ENTITIES
+        
 
         milk_groups = world.get("condensed_milk", [])
         for milk_list in milk_groups:
             for milk in milk_list:
-                  if hasattr(milk, "position"):
-                      # Create a brand new rect copy or a fresh rect for this specific milk
-                      current_milk_rect = milk_img.get_rect()
-                      current_milk_rect.center = milk.position
-
-                      # Blit using the individual rectangle
-                      screen.blit(milk_img, current_milk_rect)
+                if milk.shown and hasattr(milk, "position"):
+                    current_milk_rect = milk_img.get_rect()
+                    current_milk_rect.center = milk.position
+                    screen.blit(milk_img, current_milk_rect)
 
         honey_groups = world.get("honey", [])
         for honey_list in honey_groups:
             for honey in honey_list:
-                  if hasattr(honey, "position"):
-                      # Create a brand new rect copy or a fresh rect for this specific honey
-                      current_honey_rect = honey_img.get_rect()
-                      current_honey_rect.center = honey.position
+                if honey.shown and hasattr(honey, "position"):
+                    current_honey_rect = honey_img.get_rect()
+                    current_honey_rect.center = honey.position
+                    screen.blit(honey_img, current_honey_rect)
 
-                      # Blit using the individual rectangle
-                      screen.blit(honey_img, current_honey_rect)
-
-
-                
-        pooh_list = world.get("pooh", []) 
+        pooh_list = world.get("pooh", [])
         for pooh in pooh_list:
-                if hasattr(pooh, "position"):
-                    current_player_rect = player_img.get_rect()
-                    current_player_rect.center = pooh.position
-                    screen.blit(player_img, current_player_rect)
+            if pooh.shown and hasattr(pooh, "position"):
+                current_player_rect = player_img.get_rect()
+                current_player_rect.center = pooh.position
+                screen.blit(player_img, current_player_rect)
 
+        pygame.display.flip()  # Update the display
+        clock.tick(60)         # Keep the cycle capped at 60 FPS
 
-        pygame.display.flip()  # update the display
-        clock.tick(30)  # limit the framerate to 24 frames per second
+    
+
 
     pygame.quit()
     sys.exit()
